@@ -1,17 +1,15 @@
-"parameters": {
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
     "vmName": {
-        "type": "String"
+      "value": "AparnaVM"
     },
     "adminUsername": {
-        "type": "String",
-        "metadata": {
-            "description": "Admin username for the VM"
-        }
+      "value": "aparnauser"
     },
     "adminPassword": {
-        "type": "SecureString",
-        "metadata": {
-            "description": "Admin password for the VM"
-        }
+      "value": "GEN-PASSWORD"
     }
+  }
 }
