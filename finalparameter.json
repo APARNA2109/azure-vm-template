@@ -9,7 +9,10 @@
       "value": "aparnauser"
     },
     "adminPassword": {
-      "value": "GEN-PASSWORD"
+      "value": "GenPassword123!"  
+    },
+    "DID": {
+      "value": "aparna12345"  
     }
   }
 }
