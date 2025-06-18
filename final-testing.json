@@ -16,6 +16,12 @@
       "metadata": {
         "description": "Admin password for the VM"
       }
+    },
+    "DID": {
+      "type": "String",
+      "metadata": {
+        "description": "Unique ID to make DNS name dynamic"
+      }
     }
   },
   "variables": {
@@ -25,7 +31,7 @@
     "nsgName": "[concat('nsg-', parameters('vmName'), '-', variables('depId'))]",
     "nicName": "[concat('nic-', parameters('vmName'), '-', variables('depId'))]",
     "ipName": "[concat('pip-', parameters('vmName'), '-', variables('depId'))]",
-    "dnsLabelPrefix": "[concat(parameters('vmName'), '-dns-', variables('depId'))]",
+    "dnsLabelPrefix": "[concat('labvm-', parameters('DID'))]",
     "vmSize": "Standard_D2s_v3",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
