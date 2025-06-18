@@ -2,9 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vmName": {
-      "type": "String"
-    },
     "adminUsername": {
       "type": "String",
       "metadata": {
@@ -26,11 +23,11 @@
   },
   "variables": {
     "depId": "aparna",
-    "vnetName": "[concat('vnet-', parameters('vmName'), '-', variables('depId'))]",
-    "subnetName": "[concat('subnet-', parameters('vmName'), '-', variables('depId'))]",
-    "nsgName": "[concat('nsg-', parameters('vmName'), '-', variables('depId'))]",
-    "nicName": "[concat('nic-', parameters('vmName'), '-', variables('depId'))]",
-    "ipName": "[concat('pip-', parameters('vmName'), '-', variables('depId'))]",
+    "vnetName": "[concat('vnet-', 'vm-aparna-29061998', '-', variables('depId'))]",
+    "subnetName": "[concat('subnet-', 'vm-aparna-29061998', '-', variables('depId'))]",
+    "nsgName": "[concat('nsg-', 'vm-aparna-29061998', '-', variables('depId'))]",
+    "nicName": "[concat('nic-', 'vm-aparna-29061998', '-', variables('depId'))]",
+    "ipName": "[concat('pip-', 'vm-aparna-29061998', '-', variables('depId'))]",
     "dnsLabelPrefix": "[concat('labvm-', parameters('DID'))]",
     "vmSize": "Standard_D2s_v3",
     "imagePublisher": "MicrosoftWindowsServer",
@@ -130,7 +127,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2023-09-01",
-      "name": "[parameters('vmName')]",
+      "name": "vm-aparna-29061998",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
@@ -140,7 +137,7 @@
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[parameters('vmName')]",
+          "computerName": "vm-aparna-29061998",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
           "windowsConfiguration": {
@@ -179,7 +176,7 @@
     },
     "VMName": {
       "type": "String",
-      "value": "[parameters('vmName')]"
+      "value": "vm-aparna-29061998"
     },
     "AdminPassword": {
       "type": "String",
