@@ -17,17 +17,18 @@
     "DID": {
       "type": "String",
       "metadata": {
-        "description": "Unique ID to make DNS name dynamic"
+        "description": "Unique ID to make DNS name and VM name dynamic"
       }
     }
   },
   "variables": {
+    "vmName": "[concat('vm-', parameters('DID'))]",
     "depId": "aparna",
-    "vnetName": "[concat('vnet-', 'vm-aparna-29061998', '-', variables('depId'))]",
-    "subnetName": "[concat('subnet-', 'vm-aparna-29061998', '-', variables('depId'))]",
-    "nsgName": "[concat('nsg-', 'vm-aparna-29061998', '-', variables('depId'))]",
-    "nicName": "[concat('nic-', 'vm-aparna-29061998', '-', variables('depId'))]",
-    "ipName": "[concat('pip-', 'vm-aparna-29061998', '-', variables('depId'))]",
+    "vnetName": "[concat('vnet-', variables('vmName'), '-', variables('depId'))]",
+    "subnetName": "[concat('subnet-', variables('vmName'), '-', variables('depId'))]",
+    "nsgName": "[concat('nsg-', variables('vmName'), '-', variables('depId'))]",
+    "nicName": "[concat('nic-', variables('vmName'), '-', variables('depId'))]",
+    "ipName": "[concat('pip-', variables('vmName'), '-', variables('depId'))]",
     "dnsLabelPrefix": "[concat('labvm-', parameters('DID'))]",
     "vmSize": "Standard_D2s_v3",
     "imagePublisher": "MicrosoftWindowsServer",
@@ -127,7 +128,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2023-09-01",
-      "name": "vm-aparna-29061998",
+      "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
@@ -137,7 +138,7 @@
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "vm-aparna-29061998",
+          "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
           "windowsConfiguration": {
@@ -176,7 +177,7 @@
     },
     "VMName": {
       "type": "String",
-      "value": "vm-aparna-29061998"
+      "value": "[variables('vmName')]"
     },
     "AdminPassword": {
       "type": "String",
