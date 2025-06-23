@@ -184,7 +184,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait; Invoke-WebRequest -Uri https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user -OutFile vscode_installer.exe; Start-Process vscode_installer.exe -Wait\""
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait; Invoke-WebRequest -Uri https://code.visualstudio.com/sha/download?build=stable`&os=win32-x64-user -OutFile vscode_installer.exe; Start-Process vscode_installer.exe -Wait\""
         }
       }
     }
