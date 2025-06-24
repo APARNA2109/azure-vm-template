@@ -25,16 +25,21 @@
       "metadata": {
         "description": "ODL User ID"
       }
+    },
+    "vmName": {
+      "type": "String",
+      "metadata": {
+        "description": "Name of the virtual machine"
+      }
     }
   },
   "variables": {
-    "vmName": "[concat('vm-', parameters('DeploymentID'))]",
     "depId": "aparna",
-    "vnetName": "[concat('vnet-', variables('vmName'), '-', variables('depId'))]",
-    "subnetName": "[concat('subnet-', variables('vmName'), '-', variables('depId'))]",
-    "nsgName": "[concat('nsg-', variables('vmName'), '-', variables('depId'))]",
-    "nicName": "[concat('nic-', variables('vmName'), '-', variables('depId'))]",
-    "ipName": "[concat('pip-', variables('vmName'), '-', variables('depId'))]",
+    "vnetName": "[concat('vnet-', parameters('vmName'), '-', variables('depId'))]",
+    "subnetName": "[concat('subnet-', parameters('vmName'), '-', variables('depId'))]",
+    "nsgName": "[concat('nsg-', parameters('vmName'), '-', variables('depId'))]",
+    "nicName": "[concat('nic-', parameters('vmName'), '-', variables('depId'))]",
+    "ipName": "[concat('pip-', parameters('vmName'), '-', variables('depId'))]",
     "dnsLabelPrefix": "[concat('labvm-', uniqueString(resourceGroup().id, parameters('DeploymentID')))]",
     "vmSize": "Standard_D2s_v3",
     "imagePublisher": "MicrosoftWindowsServer",
@@ -132,7 +137,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2023-09-01",
-      "name": "[variables('vmName')]",
+      "name": "[parameters('vmName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
@@ -142,7 +147,7 @@
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[variables('vmName')]",
+          "computerName": "[parameters('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
           "windowsConfiguration": {
@@ -176,10 +181,10 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2022-08-01",
-      "name": "[concat(variables('vmName'), '/customScript')]",
+      "name": "[concat(parameters('vmName'), '/customScript')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -188,22 +193,19 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$desktop = [Environment]::GetFolderPath('Desktop'); $file = Join-Path $desktop 'labinfo.txt'; Set-Content -Path $file -Value 'ODL ID: [parameters('ODLID')]
-Deployment ID: [parameters('DeploymentID')]
-VM Username: [parameters('adminUsername')]
-VM Password: [parameters('adminPassword')]'; Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait\""
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktop = [Environment]::GetFolderPath(\\'Desktop\\'); ', '$file = Join-Path $desktop \\\"labinfo.txt\\\"; ', 'Set-Content -Path $file -Value \\\"ODL ID: ', parameters('ODLID'), '\\nDeployment ID: ', parameters('DeploymentID'), '\\nVM Username: ', parameters('adminUsername'), '\\nVM Password: ', parameters('adminPassword'), '\\\"; ', 'Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; ', 'Start-Process chrome_installer.exe -Wait\"')]"
         }
       }
     }
   ],
   "outputs": {
+    "VMName": {
+      "type": "String",
+      "value": "[parameters('vmName')]"
+    },
     "AdminUsername": {
       "type": "String",
       "value": "[parameters('adminUsername')]"
-    },
-    "VMName": {
-      "type": "String",
-      "value": "[variables('vmName')]"
     },
     "AdminPassword": {
       "type": "String",
