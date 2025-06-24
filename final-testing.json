@@ -171,19 +171,31 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktop = [Environment]::GetFolderPath(\\'Desktop\\');', '$file = Join-Path $desktop \\\"labinfo.txt\\\";', 'Set-Content -Path $file -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\nDomain Name: ', parameters('domainName'), '\\nODL Username: ', parameters('odlUsername'), '\\nODL Password: ', parameters('odlPassword'), '\\nVM Username: ', parameters('adminUsername'), '\\nVM Password: ', parameters('adminPassword'), '\\\";', 'Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe;', 'Start-Process chrome_installer.exe -Wait\"')]"
+          "commandToExecute": "[concat(
+            'powershell -ExecutionPolicy Unrestricted -Command \"',
+            '$desktop = [Environment]::GetFolderPath(\\'Desktop\\');',
+            '$file = Join-Path $desktop \\\"labinfo.txt\\";',
+            'Set-Content -Path $file -Value \\\"Subscription ID: ', parameters('subscriptionId'),
+            '\\\\nDomain Name: ', parameters('domainName'),
+            '\\\\nODL Username: ', parameters('odlUsername'),
+            '\\\\nODL Password: ', parameters('odlPassword'),
+            '\\\\nVM Username: ', parameters('adminUsername'),
+            '\\\\nVM Password: ', parameters('adminPassword'), '\\\";',
+            'Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe;',
+            'Start-Process chrome_installer.exe -Wait\"'
+          )]"
         }
       }
     }
   ],
   "outputs": {
-    "VMName": {
-      "type": "String",
-      "value": "[variables('vmName')]"
-    },
     "AdminUsername": {
       "type": "String",
       "value": "[parameters('adminUsername')]"
+    },
+    "VMName": {
+      "type": "String",
+      "value": "[variables('vmName')]"
     },
     "AdminPassword": {
       "type": "String",
