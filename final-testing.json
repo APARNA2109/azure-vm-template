@@ -14,46 +14,28 @@
         "description": "Admin password for the VM"
       }
     },
-    "DID": {
+    "DeploymentID": {
       "type": "String",
       "metadata": {
-        "description": "Unique ID to make DNS name and VM name dynamic"
+        "description": "Deployment ID for naming resources"
       }
     },
-    "subscriptionId": {
+    "ODLID": {
       "type": "String",
       "metadata": {
-        "description": "Azure Subscription ID"
-      }
-    },
-    "domainName": {
-      "type": "String",
-      "metadata": {
-        "description": "Domain name (e.g., cloudlabs.ai)"
-      }
-    },
-    "odlUsername": {
-      "type": "String",
-      "metadata": {
-        "description": "ODL User Name"
-      }
-    },
-    "odlPassword": {
-      "type": "SecureString",
-      "metadata": {
-        "description": "ODL Password"
+        "description": "ODL User ID"
       }
     }
   },
   "variables": {
-    "vmName": "[concat('vm-', parameters('DID'))]",
+    "vmName": "[concat('vm-', parameters('DeploymentID'))]",
     "depId": "aparna",
     "vnetName": "[concat('vnet-', variables('vmName'), '-', variables('depId'))]",
     "subnetName": "[concat('subnet-', variables('vmName'), '-', variables('depId'))]",
     "nsgName": "[concat('nsg-', variables('vmName'), '-', variables('depId'))]",
     "nicName": "[concat('nic-', variables('vmName'), '-', variables('depId'))]",
     "ipName": "[concat('pip-', variables('vmName'), '-', variables('depId'))]",
-    "dnsLabelPrefix": "[concat('labvm-', uniqueString(resourceGroup().id, parameters('DID')))]",
+    "dnsLabelPrefix": "[concat('labvm-', uniqueString(resourceGroup().id, parameters('DeploymentID')))]",
     "vmSize": "Standard_D2s_v3",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
@@ -206,7 +188,10 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$desktop = [Environment]::GetFolderPath('Desktop'); $file = Join-Path $desktop 'labinfo.txt'; Set-Content -Path $file -Value 'Subscription ID: [parameters('subscriptionId')]\nDomain Name: [parameters('domainName')]\nODL Username: [parameters('odlUsername')]\nODL Password: [parameters('odlPassword')]\nVM Username: [parameters('adminUsername')]\nVM Password: [parameters('adminPassword')]'; Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait\"
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$desktop = [Environment]::GetFolderPath('Desktop'); $file = Join-Path $desktop 'labinfo.txt'; Set-Content -Path $file -Value 'ODL ID: [parameters('ODLID')]
+Deployment ID: [parameters('DeploymentID')]
+VM Username: [parameters('adminUsername')]
+VM Password: [parameters('adminPassword')]'; Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait\""
         }
       }
     }
