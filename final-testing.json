@@ -106,9 +106,7 @@
       ],
       "properties": {
         "addressSpace": {
-          "addressPrefixes": [
-            "10.0.0.0/16"
-          ]
+          "addressPrefixes": ["10.0.0.0/16"]
         },
         "subnets": [
           {
@@ -198,9 +196,7 @@
       "apiVersion": "2022-08-01",
       "name": "[concat(variables('vmName'), '/writeLabInfo')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
-      ],
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -208,7 +204,24 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktopPath = [System.Environment]::GetFolderPath(\\'Desktop\\');', '$filePath = Join-Path $desktopPath \\\"labinfo.txt\\\";', 'Set-Content -Path $filePath -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\\nDomain Name: ', parameters('domainName'), '\\\nODL Username: ', parameters('odlUsername'), '\\\nODL Password: ', parameters('odlPassword'), '\\\nVM Username: ', parameters('adminUsername'), '\\\nVM Password: ', parameters('adminPassword'), '\\\"\"')]"
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktopPath = [System.Environment]::GetFolderPath(\\'Desktop\\');', '$filePath = Join-Path $desktopPath \\\"labinfo.txt\\\";', 'Set-Content -Path $filePath -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\\\nDomain Name: ', parameters('domainName'), '\\\\nODL Username: ', parameters('odlUsername'), '\\\\nODL Password: ', parameters('odlPassword'), '\\\\nVM Username: ', parameters('adminUsername'), '\\\\nVM Password: ', parameters('adminPassword'), '\\\"\"')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-08-01",
+      "name": "[concat(variables('vmName'), '/installChrome')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [],
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Invoke-WebRequest -Uri 'https://dl.google.com/chrome/install/375.126/chrome_installer.exe' -OutFile 'chrome_installer.exe'; Start-Process 'chrome_installer.exe' -ArgumentList '/silent', '/install' -Wait;\""
         }
       }
     }
