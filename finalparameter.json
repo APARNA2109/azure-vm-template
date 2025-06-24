@@ -8,11 +8,11 @@
     "adminPassword": {
       "value": "GEN-PASSWORD"
     },
-    "DID": {
-      "value": "aparna12345"
+    "ODLID": {
+      "value": "GET-ODL-ID"
     },
     "DeploymentID": {
-      "value": "GET-DEPLOYMENT-ID"
+      "value": "aparna12345"
     }
   }
 }
