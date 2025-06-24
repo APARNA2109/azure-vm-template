@@ -12,7 +12,10 @@
       "value": "GET-ODL-ID"
     },
     "DeploymentID": {
-      "value": "aparna12345"
+      "value": "GET-DEPLOYMENT-ID"
+    },
+    "vmName": {
+      "value": "vm-GET-DEPLOYMENT-ID"
     }
   }
 }
