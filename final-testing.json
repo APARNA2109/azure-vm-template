@@ -19,6 +19,30 @@
       "metadata": {
         "description": "Unique ID to make DNS name and VM name dynamic"
       }
+    },
+    "subscriptionId": {
+      "type": "String",
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
+    },
+    "domainName": {
+      "type": "String",
+      "metadata": {
+        "description": "Domain name (e.g., cloudlabs.ai)"
+      }
+    },
+    "odlUsername": {
+      "type": "String",
+      "metadata": {
+        "description": "ODL User Name"
+      }
+    },
+    "odlPassword": {
+      "type": "SecureString",
+      "metadata": {
+        "description": "ODL Password"
+      }
     }
   },
   "variables": {
@@ -172,7 +196,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2022-08-01",
-      "name": "[concat(variables('vmName'), '/installChrome')]",
+      "name": "[concat(variables('vmName'), '/writeLabInfo')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
@@ -184,7 +208,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -ArgumentList '/silent', '/install' -Wait\""
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktopPath = [System.Environment]::GetFolderPath(\\'Desktop\\');', '$filePath = Join-Path $desktopPath \\\"labinfo.txt\\\";', 'Set-Content -Path $filePath -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\\nDomain Name: ', parameters('domainName'), '\\\nODL Username: ', parameters('odlUsername'), '\\\nODL Password: ', parameters('odlPassword'), '\\\nVM Username: ', parameters('adminUsername'), '\\\nVM Password: ', parameters('adminPassword'), '\\\"\"')]"
         }
       }
     }
