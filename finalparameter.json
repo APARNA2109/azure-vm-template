@@ -1,27 +1,194 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "adminUsername": {
-      "value": "aparnauser"
+    "adminUsername": { "type": "String", "metadata": { "description": "Admin username for the VM" } },
+    "adminPassword": { "type": "SecureString", "metadata": { "description": "Admin password for the VM" } },
+    "DID": { "type": "String", "metadata": { "description": "Unique ID to make DNS name and VM name dynamic" } },
+    "subscriptionId": { "type": "String", "metadata": { "description": "Azure Subscription ID" } },
+    "domainName": { "type": "String", "metadata": { "description": "Domain name (e.g., cloudlabs.ai)" } },
+    "odlUsername": { "type": "String", "metadata": { "description": "ODL User Name" } },
+    "odlPassword": { "type": "SecureString", "metadata": { "description": "ODL Password" } }
+  },
+  "variables": {
+    "vmName": "[concat('vm-', parameters('DID'))]",
+    "depId": "aparna",
+    "vnetName": "[concat('vnet-', variables('vmName'), '-', variables('depId'))]",
+    "subnetName": "[concat('subnet-', variables('vmName'), '-', variables('depId'))]",
+    "nsgName": "[concat('nsg-', variables('vmName'), '-', variables('depId'))]",
+    "nicName": "[concat('nic-', variables('vmName'), '-', variables('depId'))]",
+    "ipName": "[concat('pip-', variables('vmName'), '-', variables('depId'))]",
+    "dnsLabelPrefix": "[concat('labvm-', uniqueString(resourceGroup().id, parameters('DID')))]",
+    "vmSize": "Standard_D2s_v3",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "imageSku": "2019-Datacenter",
+    "imageVersion": "latest"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('ipName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[toLower(variables('dnsLabelPrefix'))]"
+        }
+      }
     },
-    "adminPassword": {
-      "value": "GenPassword123!"
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowRDP",
+            "properties": {
+              "priority": 1000,
+              "access": "Allow",
+              "direction": "Inbound",
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
     },
-    "DID": {
-      "value": "aparna12345"
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('vnetName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["10.0.0.0/16"]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+            }
+          }
+        ]
+      }
     },
-    "subscriptionId": {
-      "value": "your-subscription-id-here"
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('ipName'))]"
+              }
+            }
+          }
+        ]
+      }
     },
-    "domainName": {
-      "value": "cloudlabs.ai"
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"],
+      "properties": {
+        "hardwareProfile": { "vmSize": "[variables('vmSize')]" },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "enableAutomaticUpdates": true,
+            "provisionVMAgent": true
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]" }
+          ]
+        }
+      }
     },
-    "odlUsername": {
-      "value": "your-odl-username-here"
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-08-01",
+      "name": "[concat(variables('vmName'), '/writeLabInfo')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [],
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"$desktopPath = [System.Environment]::GetFolderPath('Desktop'); $filePath = Join-Path $desktopPath 'labinfo.txt'; $content = @\"Subscription ID: [parameters('subscriptionId')]\nDomain Name: [parameters('domainName')]\nODL Username: [parameters('odlUsername')]\nODL Password: [parameters('odlPassword')]\nVM Username: [parameters('adminUsername')]\nVM Password: [parameters('adminPassword')]\"; Set-Content -Path $filePath -Value $content\""
+        }
+      }
     },
-    "odlPassword": {
-      "value": "your-odl-password-here"
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-08-01",
+      "name": "[concat(variables('vmName'), '/installChrome')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [],
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source 'https://dl.google.com/chrome/install/375.126/chrome_installer.exe' -Destination 'chrome_installer.exe'; Start-Process 'chrome_installer.exe' -Wait\""
+        }
+      }
     }
+  ],
+  "outputs": {
+    "AdminUsername": { "type": "String", "value": "[parameters('adminUsername')]" },
+    "VMName": { "type": "String", "value": "[variables('vmName')]" },
+    "AdminPassword": { "type": "String", "value": "[parameters('adminPassword')]" },
+    "DNSName": { "type": "String", "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('ipName'))).dnsSettings.fqdn]" }
   }
 }
