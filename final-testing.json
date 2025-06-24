@@ -193,7 +193,15 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktop = [Environment]::GetFolderPath(\\'Desktop\\'); ', '$file = Join-Path $desktop \\\"labinfo.txt\\\"; ', 'Set-Content -Path $file -Value \\\"ODL ID: ', parameters('ODLID'), '\\nDeployment ID: ', parameters('DeploymentID'), '\\nVM Username: ', parameters('adminUsername'), '\\nVM Password: ', parameters('adminPassword'), '\\\"; ', 'Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; ', 'Start-Process chrome_installer.exe -Wait\"')]"
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', 
+            '$desktop = [Environment]::GetFolderPath(\\'Desktop\\'); ',
+            '$file = Join-Path $desktop \\\"labinfo.txt\\\"; ',
+            '$content = \\\"ODL ID: ', parameters('ODLID'), '\\r\\nDeployment ID: ', parameters('DeploymentID'), 
+            '\\r\\nVM Username: ', parameters('adminUsername'), 
+            '\\r\\nVM Password: ', parameters('adminPassword'), '\\\"; ',
+            'Set-Content -Path $file -Value $content; ',
+            'Invoke-WebRequest -Uri https://dl.google.com/chrome/install/375.126/chrome_installer.exe -OutFile chrome_installer.exe; ',
+            'Start-Process chrome_installer.exe -Wait\"')]"
         }
       }
     }
