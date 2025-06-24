@@ -172,7 +172,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2022-08-01",
-      "name": "[concat(variables('vmName'), '/installTools')]",
+      "name": "[concat(variables('vmName'), '/installChrome')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
@@ -184,7 +184,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -Wait; Invoke-WebRequest -Uri https://code.visualstudio.com/sha/download?build=stable`&os=win32-x64-user -OutFile vscode_installer.exe; Start-Process vscode_installer.exe -Wait\""
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe; Start-Process chrome_installer.exe -ArgumentList '/silent', '/install' -Wait\""
         }
       }
     }
