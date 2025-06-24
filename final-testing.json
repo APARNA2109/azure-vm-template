@@ -2,48 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "adminUsername": {
-      "type": "String",
-      "metadata": {
-        "description": "Admin username for the VM"
-      }
-    },
-    "adminPassword": {
-      "type": "SecureString",
-      "metadata": {
-        "description": "Admin password for the VM"
-      }
-    },
-    "DID": {
-      "type": "String",
-      "metadata": {
-        "description": "Unique ID to make DNS name and VM name dynamic"
-      }
-    },
-    "subscriptionId": {
-      "type": "String",
-      "metadata": {
-        "description": "Azure Subscription ID"
-      }
-    },
-    "domainName": {
-      "type": "String",
-      "metadata": {
-        "description": "Domain name (e.g., cloudlabs.ai)"
-      }
-    },
-    "odlUsername": {
-      "type": "String",
-      "metadata": {
-        "description": "ODL User Name"
-      }
-    },
-    "odlPassword": {
-      "type": "SecureString",
-      "metadata": {
-        "description": "ODL Password"
-      }
-    }
+    "adminUsername": { "type": "String" },
+    "adminPassword": { "type": "SecureString" },
+    "DID": { "type": "String" },
+    "subscriptionId": { "type": "String" },
+    "domainName": { "type": "String" },
+    "odlUsername": { "type": "String" },
+    "odlPassword": { "type": "SecureString" }
   },
   "variables": {
     "vmName": "[concat('vm-', parameters('DID'))]",
@@ -194,9 +159,11 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2022-08-01",
-      "name": "[concat(variables('vmName'), '/writeLabInfo')]",
+      "name": "[concat(variables('vmName'), '/customScript')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+      ],
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -204,36 +171,19 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktopPath = [System.Environment]::GetFolderPath(\\'Desktop\\');', '$filePath = Join-Path $desktopPath \\\"labinfo.txt\\\";', 'Set-Content -Path $filePath -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\\\nDomain Name: ', parameters('domainName'), '\\\\nODL Username: ', parameters('odlUsername'), '\\\\nODL Password: ', parameters('odlPassword'), '\\\\nVM Username: ', parameters('adminUsername'), '\\\\nVM Password: ', parameters('adminPassword'), '\\\"\"')]"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "apiVersion": "2022-08-01",
-      "name": "[concat(variables('vmName'), '/installChrome')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"],
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.10",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "fileUris": [],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -Command \"Invoke-WebRequest -Uri 'https://dl.google.com/chrome/install/375.126/chrome_installer.exe' -OutFile 'chrome_installer.exe'; Start-Process 'chrome_installer.exe' -ArgumentList '/silent', '/install' -Wait;\""
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -Command \"', '$desktop = [Environment]::GetFolderPath(\\'Desktop\\');', '$file = Join-Path $desktop \\\"labinfo.txt\\\";', 'Set-Content -Path $file -Value \\\"Subscription ID: ', parameters('subscriptionId'), '\\nDomain Name: ', parameters('domainName'), '\\nODL Username: ', parameters('odlUsername'), '\\nODL Password: ', parameters('odlPassword'), '\\nVM Username: ', parameters('adminUsername'), '\\nVM Password: ', parameters('adminPassword'), '\\\";', 'Start-BitsTransfer -Source https://dl.google.com/chrome/install/375.126/chrome_installer.exe -Destination chrome_installer.exe;', 'Start-Process chrome_installer.exe -Wait\"')]"
         }
       }
     }
   ],
   "outputs": {
-    "AdminUsername": {
-      "type": "String",
-      "value": "[parameters('adminUsername')]"
-    },
     "VMName": {
       "type": "String",
       "value": "[variables('vmName')]"
+    },
+    "AdminUsername": {
+      "type": "String",
+      "value": "[parameters('adminUsername')]"
     },
     "AdminPassword": {
       "type": "String",
